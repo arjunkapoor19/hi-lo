@@ -3,31 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
-const PointsPopup: React.FC<{ points: number; isCorrect: boolean }> = ({ points, isCorrect }) => {
-    return (
-      <div 
-        className={`
-          absolute
-          top-8 
-          left-1/2
-          bottom-0
-          transform 
-          -translate-x-1/2 
-          animate-bounce 
-          ${isCorrect ? 'text-green-500' : 'text-red-500'}
-          text-3xl 
-          font-bold 
-          z-50
-          pointer-events-none
-          duration-700
-          opacity-0
-          animate-fade-out
-        `}
-      >
-        {isCorrect ? '+' : '-'}{points}
-      </div>
-    );
-  };
   
 const COMPANIES = [
     {
@@ -242,12 +217,12 @@ export default function CardGame() {
   const [points, setPoints] = useState(0.0);
   const [companyHistory, setCompanyHistory] = useState<Company[]>([]);
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
-  const [winAnimations, setWinAnimations] = useState([]);
-  const [lossAnimations, setLossAnimations] = useState([]);
+  const [winAnimations, setWinAnimations] = useState<{id:string}[]>([]);
+  const [lossAnimations, setLossAnimations] = useState<{ id: string }[]>([]);
   const animationCounter = useRef(0);
-  const showWin = (points) => {
+  const showWin = () => {
     const id = `win-${animationCounter.current++}`; // Unique incremental key
-    const newAnimation = { id, points };
+    const newAnimation = { id };
     
     setWinAnimations(prev => [...prev, newAnimation]);
     
@@ -256,9 +231,9 @@ export default function CardGame() {
       setWinAnimations(prev => prev.filter(anim => anim.id !== id));
     }, 700);
   };
-  const showLoss = (points) => {
+  const showLoss = () => {
     const id = `loss-${animationCounter.current++}`; // Unique incremental key
-    const newAnimation = { id, points };
+    const newAnimation = { id };
     
     setLossAnimations(prev => [...prev, newAnimation]);
     
@@ -311,13 +286,13 @@ export default function CardGame() {
 
       // Compare with the most recent company in history
       const lastCompany = prevHistory[0];
-      let isCorrect = false;
+      
       if (
         (guessHigher && currentCompany!.valuation > lastCompany.valuation) ||
         (!guessHigher && currentCompany!.valuation < lastCompany.valuation)
       ) {
         setPoints((prev) => prev + 100);
-        showWin(100)
+        showWin()
         
       } else {
         setPoints((prev) => {
@@ -325,7 +300,7 @@ export default function CardGame() {
           
           return newPoints;
         });
-        showLoss(100)
+        showLoss()
       }
 
       
@@ -385,7 +360,7 @@ export default function CardGame() {
             <div className="flex flex-col items-center space-y-4 w-full relative">
             {/* Existing buttons */}
             <AnimatePresence>
-        {winAnimations.map(({ id, points }) => (
+        {winAnimations.map(({ id}) => (
           <motion.div
             key={id}
             initial={{ opacity: 0, y: 0 }}
@@ -405,10 +380,10 @@ export default function CardGame() {
               pointer-events-none
             `}
           >
-            +{points}
+            +100
           </motion.div>
         ))}
-        {lossAnimations.map(({ id, points }) => (
+        {lossAnimations.map(({ id }) => (
           <motion.div
             key={id}
             initial={{ opacity: 0, y: 10 }}
@@ -428,7 +403,7 @@ export default function CardGame() {
               pointer-events-none
             `}
           >
-            -{points}
+            -100
           </motion.div>
         ))}
       </AnimatePresence>
