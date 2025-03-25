@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from 'motion/react';
+import { Button, Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+
   
 const COMPANIES = [
     {
@@ -213,6 +215,7 @@ const COMPANIES = [
 
 type Company = (typeof COMPANIES)[number];
 
+
 export default function CardGame() {
   const [points, setPoints] = useState(0.0);
   const [companyHistory, setCompanyHistory] = useState<Company[]>([]);
@@ -220,6 +223,12 @@ export default function CardGame() {
   const [winAnimations, setWinAnimations] = useState<{id:string}[]>([]);
   const [lossAnimations, setLossAnimations] = useState<{ id: string }[]>([]);
   const animationCounter = useRef(0);
+  const [isOpen, setIsOpen] = useState(true);
+
+  function close() {
+    setIsOpen(false)
+  }
+
   const showWin = () => {
     const id = `win-${animationCounter.current++}`; // Unique incremental key
     const newAnimation = { id };
@@ -242,7 +251,6 @@ export default function CardGame() {
       setLossAnimations(prev => prev.filter(anim => anim.id !== id));
     }, 700);
   };
-
 
 
  
@@ -280,7 +288,7 @@ export default function CardGame() {
       );
 
       if (!newCompany) {
-        window.alert("Your total score is: " + points);
+        setIsOpen(true)
         return prevHistory;
       }
 
@@ -313,6 +321,32 @@ export default function CardGame() {
   return (
     <div className="flex flex-col min-h-screen bg-[#E5D7EA] text-white">
 
+      <Dialog open={isOpen} as="div" className="relative z-10 focus:outline-none" onClose={close}>
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <DialogPanel
+              transition
+              className="w-50% max-w-md rounded-xl bg-white/90 p-6 backdrop-blur-2xl duration-300 ease-out data-[closed]:transform-[scale(95%)] data-[closed]:opacity-0"
+            >
+              <DialogTitle as="h3" className="text-base/7 font-bold text-black">
+                Your score is : {points}
+              </DialogTitle>
+              <p className="mt-2 text-sm/6 text-black/50 font-medium">
+                Well done! Register for accelerate!
+              </p>
+              <div className="mt-4">
+                <Button
+                  className="inline-flex items-center gap-2 rounded-md bg-gray-700 py-1.5 px-3 text-sm/6 font-semibold text-white shadow-inner shadow-white/10 focus:outline-none data-[hover]:bg-gray-600 data-[focus]:outline-1 data-[focus]:outline-white data-[open]:bg-gray-700"
+                  onClick={close}
+                >
+                  Play Again
+                </Button>
+              </div>
+            </DialogPanel>
+          </div>
+        </div>
+      </Dialog>
+      
         <nav className="w-full bg-[#6F30D2] py-4 px-6">
         <div className="text-white text-2xl font-bold text-center">
           HI-LO VAULT
