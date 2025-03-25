@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
-
+import { motion, AnimatePresence } from 'motion/react';
 const PointsPopup: React.FC<{ points: number; isCorrect: boolean }> = ({ points, isCorrect }) => {
     return (
       <div 
@@ -242,11 +242,35 @@ export default function CardGame() {
   const [points, setPoints] = useState(0.0);
   const [companyHistory, setCompanyHistory] = useState<Company[]>([]);
   const [currentCompany, setCurrentCompany] = useState<Company | null>(null);
- 
-  const [showPointsPopup, setShowPointsPopup] = useState(false);
-  const [popupPoints, setPopupPoints] = useState(0);
-  const [isCorrectGuess, setIsCorrectGuess] = useState(false);
+  const [winAnimations, setWinAnimations] = useState([]);
+  const [lossAnimations, setLossAnimations] = useState([]);
+  const animationCounter = useRef(0);
+  const showWin = (points) => {
+    const id = `win-${animationCounter.current++}`; // Unique incremental key
+    const newAnimation = { id, points };
+    
+    setWinAnimations(prev => [...prev, newAnimation]);
+    
+    // Automatically remove the animation after it completes
+    setTimeout(() => {
+      setWinAnimations(prev => prev.filter(anim => anim.id !== id));
+    }, 700);
+  };
+  const showLoss = (points) => {
+    const id = `loss-${animationCounter.current++}`; // Unique incremental key
+    const newAnimation = { id, points };
+    
+    setLossAnimations(prev => [...prev, newAnimation]);
+    
+    // Automatically remove the animation after it completes
+    setTimeout(() => {
+      setLossAnimations(prev => prev.filter(anim => anim.id !== id));
+    }, 700);
+  };
 
+
+
+ 
 
   const generateRandomCompany = useCallback(
     (excludedCompanies: string[]): Company | null => {
@@ -293,25 +317,18 @@ export default function CardGame() {
         (!guessHigher && currentCompany!.valuation < lastCompany.valuation)
       ) {
         setPoints((prev) => prev + 100);
-        isCorrect = true;
-        setPopupPoints(100);
+        showWin(100)
+        
       } else {
         setPoints((prev) => {
           const newPoints = prev - 100 < 0 ? 0 : prev - 100;
-          setPopupPoints(100);
+          
           return newPoints;
         });
-        isCorrect = false;
+        showLoss(100)
       }
 
-      // Trigger points popup
-      setIsCorrectGuess(isCorrect);
-      setShowPointsPopup(true);
-
-      // Hide popup after animation
-      setTimeout(() => {
-        setShowPointsPopup(false);
-      }, 2000);
+      
 
       setCurrentCompany(newCompany);
       return [currentCompany!, ...prevHistory];
@@ -323,7 +340,7 @@ export default function CardGame() {
 
         <nav className="w-full bg-[#6F30D2] py-4 px-6">
         <div className="text-white text-2xl font-bold text-center">
-          VALUATION HI-LO
+          HI-LO VAULT
         </div>
       </nav>
 
@@ -367,12 +384,54 @@ export default function CardGame() {
 
             <div className="flex flex-col items-center space-y-4 w-full relative">
             {/* Existing buttons */}
-            {showPointsPopup && (
-            <PointsPopup 
-            points={popupPoints} 
-            isCorrect={isCorrectGuess} 
-            />
-        )}
+            <AnimatePresence>
+        {winAnimations.map(({ id, points }) => (
+          <motion.div
+            key={id}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y:-15 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.7 }}
+            className={`
+              absolute
+              top-0
+              left-1/2
+              transform 
+              -translate-x-1/2 
+              text-green-500
+              text-3xl 
+              font-bold 
+              z-50
+              pointer-events-none
+            `}
+          >
+            +{points}
+          </motion.div>
+        ))}
+        {lossAnimations.map(({ id, points }) => (
+          <motion.div
+            key={id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{opacity: 1, y:25}}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.7 }}
+            className={`
+              absolute
+              top-0
+              left-1/2
+              transform 
+              -translate-x-1/2 
+              text-red-500
+              text-3xl 
+              font-bold 
+              z-50
+              pointer-events-none
+            `}
+          >
+            -{points}
+          </motion.div>
+        ))}
+      </AnimatePresence>
 </div>
           </div>
         </div>
