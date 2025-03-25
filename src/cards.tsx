@@ -223,7 +223,7 @@ export default function CardGame() {
   const [winAnimations, setWinAnimations] = useState<{id:string}[]>([]);
   const [lossAnimations, setLossAnimations] = useState<{ id: string }[]>([]);
   const animationCounter = useRef(0);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   function close() {
     setIsOpen(false)
