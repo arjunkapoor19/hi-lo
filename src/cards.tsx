@@ -281,7 +281,7 @@ export default function CardGame() {
       );
 
       if (!newCompany) {
-        window.alert(points);
+        window.alert("Your total score is: " + points);
         return prevHistory;
       }
 
@@ -320,6 +320,13 @@ export default function CardGame() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#E5D7EA] text-white">
+
+        <nav className="w-full bg-[#6F30D2] py-4 px-6">
+        <div className="text-white text-2xl font-bold text-center">
+          VALUATION HI-LO
+        </div>
+      </nav>
+
       {/* Left sidebar with betting controls */}
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr]">
         <div className="border-r border-gray-700 p-4 flex flex-col gap-4">
@@ -441,10 +448,6 @@ export default function CardGame() {
               ))}
             </div>
           </div>
-
-        
-    
-        
         
         </div>
       </div>
